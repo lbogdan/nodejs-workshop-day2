@@ -1,7 +1,7 @@
 const express = require('express');
-const ah = require('express-async-handler');
+// const ah = require('express-async-handler');
 const morgan = require('morgan');
-const bookmarks = require('./repositories/bookmarks');
+const bookmarks = require('./routes/bookmarks');
 
 const app = express();
 
@@ -34,61 +34,7 @@ function globalErrorHandler(err, req, res, next) {
 app.use(express.json());
 app.use(morgan('dev'));
 
-app.get(
-  '/api/v1/bookmarks',
-  ah(async (req, res) => {
-    res.json(await bookmarks.getAll());
-  })
-);
-
-function sendNotFound(res) {
-  res.sendStatus(404);
-}
-
-app.get(
-  '/api/v1/bookmarks/:id',
-  ah(async (req, res) => {
-    const id = parseInt(req.params.id);
-    const bookmark = await bookmarks.get(id);
-    if (bookmark) {
-      return res.json(bookmark);
-    }
-    sendNotFound(res);
-  })
-);
-
-app.post(
-  '/api/v1/bookmarks',
-  ah(async (req, res) => {
-    const bookmark = await bookmarks.create(req.body);
-    res.json(bookmark);
-  })
-);
-
-app.put(
-  '/api/v1/bookmarks/:id',
-  ah(async (req, res) => {
-    const id = parseInt(req.params.id);
-    const bookmark = await bookmarks.update(id, req.body);
-    if (bookmark) {
-      return res.send(bookmark);
-    }
-    res.sendStatus(404);
-    // throw NotFoundError();
-  })
-);
-
-app.delete(
-  '/api/v1/bookmarks/:id',
-  ah(async (req, res) => {
-    const id = parseInt(req.params.id);
-    const deleted = await bookmarks.delete(id);
-    if (deleted) {
-      return res.sendStatus(204);
-    }
-    res.sendStatus(404);
-  })
-);
+app.use('/api/v1/bookmarks', bookmarks);
 
 app.use(globalErrorHandler);
 
