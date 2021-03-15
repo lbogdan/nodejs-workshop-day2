@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Socket.io simple chat</title>
+  <!-- <link rel="stylesheet" href="./style.css" /> -->
+  <style>
+    body {
+      font-family: Arial, Helvetica, sans-serif;
+    }
+  </style>
+</head>
+
+<body>
+  <div>
+    <span>Name:</span>
+    <input type="text" id="name">
+    <button id="connect">connect</button>
+  </div>
+  <textarea id="messages" cols="80" rows="20"></textarea>
+  <div>
+    <span>Message:</span>
+    <input type="text" id="message" disabled>
+    <button id="send" disabled>send</button>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/js/app.js"></script>
+</body>
+
+</html>
