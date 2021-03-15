@@ -57,10 +57,8 @@ async function update(id, bookmark) {
 }
 
 async function del(id) {
-  console.log('delete', id);
   const bookmarks = await getAll();
   const index = bookmarks.findIndex((bookmark) => bookmark.id === id);
-  console.log('index:', index);
   if (index === -1) {
     return;
   }
