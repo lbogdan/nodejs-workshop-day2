@@ -1,17 +1,11 @@
 const express = require('express');
 const ah = require('express-async-handler');
+const morgan = require('morgan');
+const bookmarks = require('./repositories/bookmarks');
 
 const app = express();
 
 const port = 8080;
-
-const bookmarks = [
-  {
-    id: 1,
-    url: 'https://google.com/',
-    title: 'Google',
-  },
-];
 
 class NotFoundError extends Error {
   constructor(message) {
@@ -29,6 +23,7 @@ function globalErrorHandler(err, req, res, next) {
     return res.sendStatus(404);
   }
 
+  console.log(err);
   res.status(500);
   res.json({
     error: err.message,
@@ -37,12 +32,12 @@ function globalErrorHandler(err, req, res, next) {
 }
 
 app.use(express.json());
+app.use(morgan('dev'));
 
 app.get(
   '/api/v1/bookmarks',
   ah(async (req, res) => {
-    // throw new Error('Database error');
-    res.json(bookmarks);
+    res.json(await bookmarks.getAll());
   })
 );
 
@@ -50,45 +45,50 @@ function sendNotFound(res) {
   res.sendStatus(404);
 }
 
-app.get('/api/v1/bookmarks/:id', (req, res) => {
-  const bookmark = bookmarks.find((b) => b.id === parseInt(req.params.id));
-  if (bookmark) {
-    return res.json(bookmark);
-  }
-  sendNotFound(res);
-});
+app.get(
+  '/api/v1/bookmarks/:id',
+  ah(async (req, res) => {
+    const id = parseInt(req.params.id);
+    const bookmark = await bookmarks.get(id);
+    if (bookmark) {
+      return res.json(bookmark);
+    }
+    sendNotFound(res);
+  })
+);
 
-app.post('/api/v1/bookmarks', (req, res) => {
-  const newId = bookmarks[bookmarks.length - 1].id + 1;
-  const bookmark = req.body;
-  bookmark.id = newId;
-  bookmarks.push(bookmark);
-  res.json(bookmark);
-});
+app.post(
+  '/api/v1/bookmarks',
+  ah(async (req, res) => {
+    const bookmark = await bookmarks.create(req.body);
+    res.json(bookmark);
+  })
+);
 
-app.put('/api/v1/bookmarks/:id', (req, res) => {
-  const id = parseInt(req.params.id);
-  const bookmark = req.body;
-  bookmark.id = id;
-  const index = bookmarks.findIndex((b) => b.id === id);
-  if (index !== -1) {
-    // bookmarks.splice(index, 1, bookmark);
-    bookmarks[index] = bookmark;
-    return res.json(bookmark);
-  }
-  res.sendStatus(404);
-  // throw NotFoundError();
-});
+app.put(
+  '/api/v1/bookmarks/:id',
+  ah(async (req, res) => {
+    const id = parseInt(req.params.id);
+    const bookmark = await bookmarks.update(id, req.body);
+    if (bookmark) {
+      return res.send(bookmark);
+    }
+    res.sendStatus(404);
+    // throw NotFoundError();
+  })
+);
 
-app.delete('/api/v1/bookmarks/:id', (req, res) => {
-  const id = parseInt(req.params.id);
-  const index = bookmarks.findIndex((b) => b.id === id);
-  if (index !== -1) {
-    bookmarks.splice(index, 1);
-    return res.sendStatus(204);
-  }
-  res.sendStatus(404);
-});
+app.delete(
+  '/api/v1/bookmarks/:id',
+  ah(async (req, res) => {
+    const id = parseInt(req.params.id);
+    const deleted = await bookmarks.delete(id);
+    if (deleted) {
+      return res.sendStatus(204);
+    }
+    res.sendStatus(404);
+  })
+);
 
 app.use(globalErrorHandler);
 
