@@ -1,23 +1,35 @@
-const { Bookmark, User } = require('./sequelize');
+const { Bookmark } = require('./sequelize');
 
 async function getAll() {
   return (await Bookmark.findAll()).map((bookmark) => bookmark.toJSON());
 }
 
 async function get(id) {
-  // implement
+  const bookmark = await Bookmark.findByPk(id);
+  if (bookmark) {
+    return bookmark.toJSON();
+  }
 }
 
 async function create(bookmark) {
-  // implement
+  return (await Bookmark.create(bookmark)).toJSON();
 }
 
 async function update(id, bookmark) {
-  // implement
+  const bookmarkObj = await Bookmark.findByPk(id);
+  if (bookmarkObj) {
+    return (await bookmarkObj.update(bookmark)).toJSON();
+  }
+  return bookmark;
 }
 
 async function del(id) {
-  // implement
+  const count = await Bookmark.destroy({
+    where: {
+      id,
+    },
+  });
+  return count === 1;
 }
 
 module.exports = {

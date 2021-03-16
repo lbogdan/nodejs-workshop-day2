@@ -1,25 +1,25 @@
 const kv = require('./kv');
-// const Joi = require('joi');
+const Joi = require('joi');
 
 const key = 'bookmarks';
 
-// const schema = Joi.object({
-//   url: Joi.string()
-//     .required()
-//     .uri({
-//       scheme: ['http', 'https'],
-//     }),
-//   title: Joi.string().required(),
-// });
+const schema = Joi.object({
+  url: Joi.string()
+    .required()
+    .uri({
+      scheme: ['http', 'https'],
+    }),
+  title: Joi.string().required(),
+});
 
-// function validate(bookmark) {
-//   const res = schema.validate(bookmark, {
-//     abortEarly: false,
-//   });
-//   if (res.error) {
-//     throw res.error;
-//   }
-// }
+function validate(bookmark) {
+  const res = schema.validate(bookmark, {
+    abortEarly: false,
+  });
+  if (res.error) {
+    throw res.error;
+  }
+}
 
 async function getAll() {
   return (await kv.get(key)) || [];
@@ -30,7 +30,7 @@ async function get(id) {
 }
 
 async function create(bookmark) {
-  // validate(bookmark);
+  validate(bookmark);
   const bookmarks = await getAll();
   const id = (await kv.get(`${key}.id`)) || 1;
   bookmark.id = id;
@@ -43,7 +43,7 @@ async function create(bookmark) {
 }
 
 async function update(id, bookmark) {
-  // validate(bookmark);
+  validate(bookmark);
   const bookmarks = await getAll();
   const index = bookmarks.findIndex((bookmark) => bookmark.id === id);
   if (index === -1) {

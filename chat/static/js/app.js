@@ -14,5 +14,20 @@ function addMessage(msg) {
 
 connectBtn.addEventListener('click', () => {
   socket = new io();
-  // implement
+  socket.on('connect', () => {
+    connectBtn.disabled = true;
+    sendBtn.disabled = false;
+    messageEdit.disabled = false;
+    socket.emit('user', { name: nameEdit.value });
+  });
+
+  socket.on('message', (message) => {
+    console.log('received message:', message);
+    addMessage(`${message.user.name}: ${message.message.message}`);
+  });
+});
+
+sendBtn.addEventListener('click', () => {
+  socket.emit('message', { message: messageEdit.value });
+  messageEdit.value = '';
 });
